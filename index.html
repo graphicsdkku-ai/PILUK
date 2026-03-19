@@ -509,7 +509,7 @@ footer{background:var(--dark);color:rgba(255,255,255,.65);padding:48px 22px 22px
       <ul class="footer-contact">
         <li><i class="fas fa-phone-alt"></i><span>01754007716</span></li>
         <li><i class="fab fa-whatsapp"></i><span>WhatsApp: 01754007716</span></li>
-        <li><i class="fas fa-envelope"></i><span>hello@piluk.com.bd</span></li>
+        <li><i class="fas fa-envelope"></i><span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="046c6168686b44746d68716f2a676b692a6660">[email&#160;protected]</a></span></li>
         <li><i class="fas fa-map-marker-alt"></i><span>Dhaka, Bangladesh</span></li>
         <li><i class="fas fa-clock"></i><span>Sat–Thu: 10am – 9pm</span></li>
       </ul>
@@ -572,7 +572,7 @@ footer{background:var(--dark);color:rgba(255,255,255,.65);padding:48px 22px 22px
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 var CFG={STORE:'PILUK',WA:'8801754007716',CUR:'৳',SHEET:'https://docs.google.com/spreadsheets/d/e/2PACX-1vRqCxCqvdOi2BFiSg-YlKcisxH8VKZx1mVof5sznqCChsieTHqqtu1YJef-gycwHA/pub?gid=1922661548&single=true&output=csv'};
 var allP=[],cart=[],activeF='all',activeT='latest',heroList=[],heroIdx=0,heroTimer=null,modalP=null,mQty=1;
 
@@ -584,14 +584,37 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 async function loadProducts(){
-  try{var ad=localStorage.getItem('revo_admin_products');if(ad){var ap=JSON.parse(ad);if(Array.isArray(ap)&&ap.length>0){allP=ap;renderAll();return;}}}catch(e){}
-  var proxies=[function(u){return'https://corsproxy.io/?'+encodeURIComponent(u);},function(u){return'https://api.allorigins.win/raw?url='+encodeURIComponent(u);},function(u){return u;}];
+  /* ── STEP 1: Always try Google Sheet first (works for ALL visitors) ── */
+  var proxies=[
+    function(u){return'https://corsproxy.io/?'+encodeURIComponent(u);},
+    function(u){return'https://api.allorigins.win/raw?url='+encodeURIComponent(u);},
+    function(u){return'https://thingproxy.freeboard.io/fetch/'+u;},
+    function(u){return u;}
+  ];
   var csv=null;
   for(var i=0;i<proxies.length;i++){
-    try{var r=await fetch(proxies[i](CFG.SHEET),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);var t=await r.text();if(t.indexOf(',')>-1&&t.indexOf('\n')>-1){csv=t;break;}}
-    catch(e){console.warn('Proxy '+(i+1)+' failed:',e.message);}
+    try{
+      var r=await fetch(proxies[i](CFG.SHEET),{cache:'no-store'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      var t=await r.text();
+      if(t.indexOf(',')>-1&&t.indexOf('\n')>-1){csv=t;break;}
+    }catch(e){console.warn('Proxy '+(i+1)+' failed:',e.message);}
   }
-  if(csv){var rows=parseCSV(csv);if(rows.length>0){allP=rows;renderAll();return;}}
+  if(csv){
+    var rows=parseCSV(csv);
+    if(rows.length>0){
+      allP=rows;
+      /* Cache Sheet data in localStorage so admin edits also persist */
+      try{localStorage.setItem('revo_admin_products',JSON.stringify(rows));}catch(e){}
+      renderAll();return;
+    }
+  }
+  /* ── STEP 2: Sheet unavailable — use admin-saved localStorage cache ── */
+  try{
+    var ad=localStorage.getItem('revo_admin_products');
+    if(ad){var ap=JSON.parse(ad);if(Array.isArray(ap)&&ap.length>0){allP=ap;renderAll();return;}}
+  }catch(e){}
+  /* ── STEP 3: Nothing available — show demo products ── */
   allP=getDemos();renderAll();
 }
 
@@ -906,10 +929,4 @@ function showToast(msg,type){
   t.innerHTML='<i class="fas '+(icons[type]||'fa-info-circle')+'"></i><span>'+msg+'</span>';
   wrap.appendChild(t);
   requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('show');});});
-  setTimeout(function(){t.classList.remove('show');setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},350);},3200);
-}
-
-function hideLoading(){setTimeout(function(){document.getElementById('loadingOv').classList.add('hidden');},450);}
-</script>
-</body>
-</html>
+  setTimeout(function(){t.classList.remove('show
