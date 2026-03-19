@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PILUK Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+:root{
+  --bg:#0D0F14;--panel:#14171F;--card:#1A1E28;--border:#252A36;
+  --rose:#C05572;--rose-dark:#9B3D58;--rose-light:rgba(192,85,114,.12);
+  --gold:#C8945A;--teal:#2DD4BF;
+  --text:#E8ECF4;--muted:#6B7280;--sub:#9CA3AF;
+  --success:#10B981;--warning:#F59E0B;--danger:#EF4444;
+  --font:'DM Sans',sans-serif;--font-h:'Cormorant Garamond',serif;
+  --radius:10px;--shadow:0 4px 20px rgba(0,0,0,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--panel)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+button{cursor:pointer;font-family:var(--font);border:none}
+input,select,textarea{font-family:var(--font)}
+a{text-decoration:none;color:inherit}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:40px;width:380px;box-shadow:var(--shadow)}
+.login-logo{font-family:var(--font-h);font-size:34px;font-weight:700;color:var(--rose);letter-spacing:4px;text-align:center;margin-bottom:4px}
+.login-sub{text-align:center;font-size:12px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px}
+.login-label{font-size:12px;color:var(--sub);margin-bottom:6px;display:block;font-weight:600}
+.login-inp-wrap{position:relative;margin-bottom:20px}
+.login-inp{width:100%;padding:11px 42px 11px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+.login-inp:focus{border-color:var(--rose)}
+.login-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);cursor:pointer;font-size:14px;transition:color .2s}
+.login-eye:hover{color:var(--rose)}
+.login-btn{width:100%;padding:12px;background:var(--rose);color:white;border-radius:8px;font-size:14px;font-weight:700;transition:background .2s}
+.login-btn:hover{background:var(--rose-dark)}
+.login-err{color:var(--danger);font-size:12px;text-align:center;margin-top:10px;min-height:18px}
+.login-back{text-align:center;margin-top:16px}
+.login-back a{font-size:12px;color:var(--muted);transition:color .2s}
+.login-back a:hover{color:var(--rose)}
+
+/* LAYOUT */
+.app{display:none;height:100vh;overflow:hidden}
+.app.show{display:flex}
+.sidebar{width:220px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{padding:22px 20px;border-bottom:1px solid var(--border)}
+.sidebar-brand{font-family:var(--font-h);font-size:24px;font-weight:700;color:var(--rose);letter-spacing:3px}
+.sidebar-tagline{font-size:10px;color:var(--muted);letter-spacing:1px;margin-top:2px}
+.sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-section-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;padding:8px 10px 4px}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:var(--sub);cursor:pointer;transition:all .18s;margin-bottom:2px}
+.nav-link i{font-size:14px;width:18px;text-align:center}
+.nav-link:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav-link.active{background:var(--rose-light);color:var(--rose)}
+.nav-link.active i{color:var(--rose)}
+.sidebar-footer{padding:14px 20px;border-top:1px solid var(--border)}
+.store-link{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);transition:color .2s;cursor:pointer}
+.store-link:hover{color:var(--teal)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:0 24px;height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--panel);flex-shrink:0}
+.topbar-title{font-size:16px;font-weight:700;color:var(--text)}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.btn-sm{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-rose{background:var(--rose);color:white}
+.btn-rose:hover{background:var(--rose-dark)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--sub)}
+.btn-ghost:hover{border-color:var(--rose);color:var(--rose)}
+.btn-teal{background:rgba(45,212,191,.15);color:var(--teal);border:1px solid rgba(45,212,191,.25)}
+.btn-teal:hover{background:rgba(45,212,191,.25)}
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;display:flex;align-items:flex-start;gap:14px}
+.stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.si-rose{background:var(--rose-light);color:var(--rose)}
+.si-teal{background:rgba(45,212,191,.12);color:var(--teal)}
+.si-gold{background:rgba(200,148,90,.12);color:var(--gold)}
+.si-green{background:rgba(16,185,129,.12);color:var(--success)}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.stat-value{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.stat-note{font-size:11px;color:var(--sub);margin-top:4px}
+
+/* TABLES */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-toolbar{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.table-search{flex:1;min-width:180px;padding:8px 13px;background:var(--panel);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none;transition:border-color .2s}
+.table-search:focus{border-color:var(--rose)}
+.table-search::placeholder{color:var(--muted)}
+select.tbl-filter{padding:8px 12px;background:var(--panel);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;outline:none;cursor:pointer;transition:border-color .2s}
+select.tbl-filter:focus{border-color:var(--rose)}
+table{width:100%;border-collapse:collapse}
+th{padding:11px 16px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--panel)}
+td{padding:11px 16px;font-size:13px;border-bottom:1px solid rgba(37,42,54,.6);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.015)}
+.td-img{width:44px;height:44px;object-fit:contain;border-radius:7px;background:var(--panel);padding:4px}
+.td-name{font-weight:600;color:var(--text)}
+.td-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.badge-instock{background:rgba(16,185,129,.15);color:var(--success)}
+.badge-outstock{background:rgba(239,68,68,.12);color:var(--danger)}
+.badge-featured{background:rgba(200,148,90,.15);color:var(--gold)}
+.badge-hero{background:var(--rose-light);color:var(--rose)}
+.badge-promo{background:rgba(45,212,191,.12);color:var(--teal)}
+.action-btn{width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;transition:all .18s;cursor:pointer;border:none}
+.act-edit{background:rgba(45,212,191,.1);color:var(--teal)}
+.act-edit:hover{background:var(--teal);color:var(--bg)}
+.act-del{background:rgba(239,68,68,.1);color:var(--danger)}
+.act-del:hover{background:var(--danger);color:white}
+.pagination{padding:12px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
+.page-btns{display:flex;gap:5px}
+.page-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--panel);color:var(--sub);transition:all .18s}
+.page-btn:hover,.page-btn.active{background:var(--rose);color:white;border-color:var(--rose)}
+
+/* DASHBOARD EXTRAS */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.dash-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.dash-card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.dash-card-title i{color:var(--rose)}
+.cat-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cat-bar-label{font-size:12px;color:var(--sub);min-width:120px}
+.cat-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.cat-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--rose),var(--gold))}
+.cat-bar-count{font-size:11px;color:var(--muted);min-width:20px;text-align:right}
+.sync-status{display:flex;align-items:center;gap:7px;font-size:12px;padding:10px 14px;border-radius:7px;border:1px solid var(--border)}
+.status-dot{width:8px;height:8px;border-radius:50%}
+.status-ok{background:var(--success)}
+.status-warn{background:var(--warning)}
+.status-err{background:var(--danger)}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:3000;display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(6px)}
+.modal-ov.open{display:flex}
+.modal-box{background:var(--panel);border:1px solid var(--border);border-radius:16px;width:100%;max-width:720px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.modal-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--panel);z-index:1}
+.modal-head h3{font-size:17px;font-weight:700;color:var(--text)}
+.modal-x{width:30px;height:30px;border-radius:7px;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;font-size:13px;border:none;transition:all .18s}
+.modal-x:hover{background:var(--danger);color:white}
+.modal-body{padding:22px 24px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.5px;text-transform:uppercase}
+.form-inp,.form-sel,.form-ta{padding:9px 12px;background:var(--card);border:1.5px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;outline:none;transition:border-color .2s;width:100%}
+.form-inp:focus,.form-sel:focus,.form-ta:focus{border-color:var(--rose)}
+.form-ta{resize:vertical;min-height:80px}
+.form-sel option{background:var(--card)}
+.toggle-row{display:flex;align-items:center;gap:10px}
+.toggle-lbl{font-size:12px;color:var(--sub)}
+.toggle{width:38px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none}
+.toggle.on{background:var(--rose)}
+.toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:white;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toggle.on::after{left:21px}
+.img-preview{width:90px;height:90px;border-radius:9px;background:var(--card);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.img-preview img{max-width:80px;max-height:80px;object-fit:contain}
+.img-preview-wrap{display:flex;align-items:flex-start;gap:13px}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:var(--panel)}
+.btn-md{padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;transition:all .2s;display:flex;align-items:center;gap:6px;border:none}
+.btn-cancel{background:var(--card);border:1px solid var(--border);color:var(--sub)}
+.btn-cancel:hover{border-color:var(--muted);color:var(--text)}
+.btn-save{background:var(--rose);color:white}
+.btn-save:hover{background:var(--rose-dark)}
+.btn-del-confirm{background:var(--danger);color:white}
+.btn-del-confirm:hover{background:#DC2626}
+
+/* IMPORT/EXPORT */
+.ie-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ie-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
+.ie-title{font-size:14px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:7px}
+.ie-title i{color:var(--rose)}
+.ie-desc{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.drop-zone{border:2px dashed var(--border);border-radius:9px;padding:28px;text-align:center;cursor:pointer;transition:all .2s}
+.drop-zone:hover,.drop-zone.over{border-color:var(--rose);background:var(--rose-light)}
+.drop-zone i{font-size:28px;color:var(--muted);margin-bottom:8px;display:block}
+.drop-zone p{font-size:12px;color:var(--muted)}
+.drop-zone span{font-size:11px;color:var(--rose)}
+.import-preview{margin-top:14px;font-size:12px;color:var(--sub);background:var(--panel);border-radius:7px;padding:11px 13px;border:1px solid var(--border);max-height:120px;overflow-y:auto}
+
+/* CONFIG */
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-state i{font-size:40px;margin-bottom:13px;display:block;color:var(--border)}
+.empty-state p{font-size:14px;color:var(--sub)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9000;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:var(--card);color:var(--text);border:1px solid var(--border);padding:11px 15px;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:8px;transform:translateX(130%);transition:transform .3s;max-width:280px;box-shadow:var(--shadow)}
+.toast.show{transform:translateX(0)}
+.toast i{font-size:14px;flex-shrink:0}
+.toast.success i{color:var(--success)}
+.toast.danger i{color:var(--danger)}
+.toast.info i{color:var(--teal)}
+
+/* COL HEADER */
+.colhead{padding:6px 0;margin-bottom:14px;font-size:12px;color:var(--sub);line-height:1.7}
+.colhead strong{color:var(--text)}
+code{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:11px;color:var(--teal)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">PILUK</div>
+    <div class="login-sub">Admin Panel · Secure Access</div>
+    <label class="login-label">Password</label>
+    <div class="login-inp-wrap">
+      <input class="login-inp" type="password" id="pwdInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <span class="login-eye" onclick="togglePwd()"><i class="fas fa-eye" id="eyeIcon"></i></span>
+    </div>
+    <button class="login-btn" onclick="doLogin()"><i class="fas fa-unlock-alt"></i> Sign In</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-back"><a href="index.html"><i class="fas fa-arrow-left"></i> Back to Store</a></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-brand">PILUK</div>
+      <div class="sidebar-tagline">Admin Panel</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-link active" onclick="showPage('dashboard',this)"><i class="fas fa-chart-pie"></i>Dashboard</div>
+      <div class="nav-link" onclick="showPage('products',this)"><i class="fas fa-shopping-bag"></i>All Products</div>
+      <div class="nav-section-label">Sections</div>
+      <div class="nav-link" onclick="showPage('hero',this)"><i class="fas fa-images"></i>Hero Slides</div>
+      <div class="nav-link" onclick="showPage('promo',this)"><i class="fas fa-star"></i>Promo Banners</div>
+      <div class="nav-section-label">Data</div>
+      <div class="nav-link" onclick="showPage('import',this)"><i class="fas fa-file-import"></i>Import / Export</div>
+      <div class="nav-link" onclick="showPage('config',this)"><i class="fas fa-cog"></i>Store Config</div>
+    </div>
+    <div class="sidebar-footer">
+      <a href="index.html" class="store-link"><i class="fas fa-external-link-alt"></i>View Store</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="btn-sm btn-teal" onclick="syncSheet()"><i class="fas fa-sync-alt"></i>Sync Sheet</button>
+        <button class="btn-sm btn-rose" onclick="openAddModal()"><i class="fas fa-plus"></i>Add Product</button>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-ov" id="productModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">Add Product</h3>
+      <button class="modal-x" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><div class="form-label">SKU *</div><input class="form-inp" id="fSku" placeholder="PL001"/></div>
+        <div class="form-group"><div class="form-label">Category *</div>
+          <select class="form-sel" id="fCat">
+            <option value="">Select category</option>
+            <option>Shoulder Bags</option><option>Clutch Bags</option><option>Tote Bags</option>
+            <option>Backpacks</option><option>Crossbody Bags</option><option>Mini Bags / Wristlets</option>
+          </select>
+        </div>
+        <div class="form-group full"><div class="form-label">Product Name *</div><input class="form-inp" id="fName" placeholder="Milano Leather Shoulder Bag"/></div>
+        <div class="form-group"><div class="form-label">Price (৳) *</div><input class="form-inp" id="fPrice" type="number" placeholder="2499"/></div>
+        <div class="form-group"><div class="form-label">Original Price (৳)</div><input class="form-inp" id="fOrigPrice" type="number" placeholder="3200 (leave 0 if no discount)"/></div>
+        <div class="form-group"><div class="form-label">Colour</div><input class="form-inp" id="fColor" placeholder="Nude Pink"/></div>
+        <div class="form-group"><div class="form-label">Size</div><input class="form-inp" id="fSize" placeholder="Medium"/></div>
+        <div class="form-group"><div class="form-label">Material</div><input class="form-inp" id="fMaterial" placeholder="Genuine Leather"/></div>
+        <div class="form-group"><div class="form-label">Badge</div><input class="form-inp" id="fBadge" placeholder="New / Hot / -20% / Sale"/></div>
+        <div class="form-group"><div class="form-label">Stock</div>
+          <select class="form-sel" id="fStock"><option value="in stock">In Stock</option><option value="out of stock">Out of Stock</option></select>
+        </div>
+        <div class="form-group full">
+          <div class="form-label">Image URL</div>
+          <div class="img-preview-wrap">
+            <input class="form-inp" id="fImage" placeholder="https://…/image.jpg" oninput="previewImg(this.value)" style="flex:1"/>
+            <div class="img-preview"><img id="imgPreview" src="" alt="" onerror="this.src='https://placehold.co/80x80/1A1E28/C05572?text=IMG'"/></div>
+          </div>
+        </div>
+        <div class="form-group full"><div class="form-label">Description</div><textarea class="form-ta" id="fDesc" placeholder="Describe the bag…"></textarea></div>
+        <div class="form-group full"><div class="form-label">Custom WhatsApp Message (optional)</div><input class="form-inp" id="fWaMsg" placeholder="Hello PILUK! I'd like to order…"/></div>
+        <div class="form-group full">
+          <div class="form-label">Flags</div>
+          <div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:4px">
+            <div class="toggle-row"><button class="toggle" id="togFeatured" onclick="toggleBtn(this)"></button><span class="toggle-lbl">Featured / Bestseller</span></div>
+            <div class="toggle-row"><button class="toggle" id="togHero" onclick="toggleBtn(this)"></button><span class="toggle-lbl">Show in Hero Slider</span></div>
+            <div class="toggle-row"><button class="toggle" id="togPromo" onclick="toggleBtn(this)"></button><span class="toggle-lbl">Show as Promo Banner</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-md btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-md btn-save" onclick="saveProduct()"><i class="fas fa-save"></i>Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-ov" id="deleteModal">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-head"><h3>Confirm Delete</h3><button class="modal-x" onclick="closeDeleteModal()"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" style="text-align:center;padding:28px">
+      <div style="font-size:38px;margin-bottom:14px">🗑️</div>
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px">Delete this product?</div>
+      <div style="font-size:13px;color:var(--muted)" id="deleteProductName"></div>
+      <div style="font-size:12px;color:var(--danger);margin-top:10px">This action cannot be undone.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-md btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-md btn-del-confirm" onclick="confirmDelete()"><i class="fas fa-trash-alt"></i>Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* =============================================
+   CONFIG + STATE
+   ============================================= */
+var PASS = 'amitomakevalobasi';
+var SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRqCxCqvdOi2BFiSg-YlKcisxH8VKZx1mVof5sznqCChsieTHqqtu1YJef-gycwHA/pub?gid=1922661548&single=true&output=csv';
+var PROXIES = [
+  function(u){return 'https://corsproxy.io/?'+encodeURIComponent(u);},
+  function(u){return 'https://api.allorigins.win/raw?url='+encodeURIComponent(u);},
+  function(u){return u;}
+];
+var CATS = ['Shoulder Bags','Clutch Bags','Tote Bags','Backpacks','Crossbody Bags','Mini Bags / Wristlets'];
+
+var products = [];
+var editingIdx = null;
+var deleteIdx = null;
+var currentPage = 1;
+var pageSize = 15;
+var tableFilter = '';
+var tableCatFilter = '';
+var tableStockFilter = '';
+var currentView = 'all';
+
+/* =============================================
+   LOGIN
+   ============================================= */
+function togglePwd(){
+  var inp = document.getElementById('pwdInput');
+  var icon = document.getElementById('eyeIcon');
+  if(inp.type==='password'){inp.type='text';icon.className='fas fa-eye-slash';}
+  else{inp.type='password';icon.className='fas fa-eye';}
+}
+function doLogin(){
+  var val = document.getElementById('pwdInput').value;
+  var err = document.getElementById('loginErr');
+  if(val === PASS){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').classList.add('show');
+    loadProducts();
+    showPage('dashboard');
+  } else {
+    err.textContent = 'Incorrect password. Please try again.';
+    document.getElementById('pwdInput').value='';
+    setTimeout(function(){err.textContent='';},3000);
+  }
+}
+
+/* =============================================
+   LOAD / SAVE
+   ============================================= */
+function loadProducts(){
+  try{var d=localStorage.getItem('revo_admin_products');if(d){var p=JSON.parse(d);if(Array.isArray(p)){products=p;return;}}}catch(e){}
+  products=[];
+}
+function saveProducts(){try{localStorage.setItem('revo_admin_products',JSON.stringify(products));}catch(e){showToast('Storage error','danger');}}
+
+/* =============================================
+   SYNC SHEET
+   ============================================= */
+async function syncSheet(){
+  showToast('Syncing from Google Sheet…','info');
+  var url = SHEET_URL;
+  var csv = null;
+  for(var i=0;i<PROXIES.length;i++){
+    try{var r=await fetch(PROXIES[i](url),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);var t=await r.text();if(t.indexOf(',')>-1&&t.indexOf('\n')>-1){csv=t;break;}}
+    catch(e){console.warn('Proxy '+(i+1)+' failed');}
+  }
+  if(!csv){showToast('Could not reach Google Sheet. Check CORS proxy.','danger');return;}
+  var rows = parseCSV(csv);
+  if(rows.length===0){showToast('Sheet appears empty','danger');return;}
+  products = rows; saveProducts();
+  showToast('Synced '+rows.length+' products from Sheet!','success');
+  renderCurrentPage();
+}
+
+function parseCSV(csv){
+  var lines=csv.trim().split('\n');
+  var hdrs=parseRow(lines[0]).map(function(h){return h.toLowerCase().replace(/"/g,'').trim();});
+  var res=[];
+  for(var i=1;i<lines.length;i++){
+    var cells=parseRow(lines[i]);
+    if(!cells[0]||cells[0].replace(/"/g,'').trim()==='')continue;
+    var o={};hdrs.forEach(function(h,idx){o[h]=(cells[idx]||'').replace(/^"|"$/g,'').trim();});
+    res.push({sku:o.sku||('PL-'+i),name:o.name||o.b||'Product',category:o.category||o.c||'General',
+      price:parseFloat(o.price||o.d||0),origPrice:parseFloat(o.originalprice||o['original price']||o.e||0),
+      color:o.color||o.f||'',size:o.size||o.g||'',material:o.material||o.h||'',
+      image:o.imageurl||o['image url']||o.image||o.i||'',badge:o.badge||o.j||'',
+      desc:o.description||o.k||'',featured:(o.featured||o.l||'').toLowerCase()==='yes',
+      stock:(o.stock||o.m||'in stock').toLowerCase(),heroSlide:(o.heroslide||o['hero slide']||o.n||'').toLowerCase()==='yes',
+      promoBanner:(o.promobanner||o['promo banner']||o.o||'').toLowerCase()==='yes',waMsg:o.whatsappmsg||o['whatsapp msg']||o.p||''});
+  }
+  return res;
+}
+function parseRow(row){var res=[],cur='',inQ=false;for(var i=0;i<row.length;i++){var c=row[i];if(c==='"'){inQ=!inQ;cur+=c;}else if(c===','&&!inQ){res.push(cur);cur='';}else{cur+=c;}}res.push(cur);return res;}
+
+/* =============================================
+   NAVIGATION
+   ============================================= */
+function showPage(page, el){
+  currentPage=1;tableFilter='';tableCatFilter='';tableStockFilter='';
+  document.querySelectorAll('.nav-link').forEach(function(n){n.classList.remove('active');});
+  if(el)el.classList.add('active');
+  else{var links=document.querySelectorAll('.nav-link');links.forEach(function(l){if(l.textContent.trim().toLowerCase().indexOf(page.toLowerCase())>-1)l.classList.add('active');});}
+  var titles={dashboard:'Dashboard',products:'All Products',hero:'Hero Slides',promo:'Promo Banners',import:'Import / Export',config:'Store Config'};
+  document.getElementById('topbarTitle').textContent=titles[page]||page;
+  currentView=page;
+  renderCurrentPage();
+}
+function renderCurrentPage(){
+  var c=document.getElementById('content');
+  if(currentView==='dashboard')c.innerHTML=buildDashboard();
+  else if(currentView==='products')c.innerHTML=buildTable('all');
+  else if(currentView==='hero')c.innerHTML=buildTable('hero');
+  else if(currentView==='promo')c.innerHTML=buildTable('promo');
+  else if(currentView==='import')c.innerHTML=buildImport();
+  else if(currentView==='config')c.innerHTML=buildConfig();
+  attachTableEvents();
+}
+
+/* =============================================
+   DASHBOARD
+   ============================================= */
+function buildDashboard(){
+  var total=products.length;
+  var featured=products.filter(function(p){return p.featured;}).length;
+  var inStock=products.filter(function(p){return p.stock!=='out of stock';}).length;
+  var heroes=products.filter(function(p){return p.heroSlide;}).length;
+  var cats={};CATS.forEach(function(c){cats[c]=0;});
+  products.forEach(function(p){if(cats[p.category]!==undefined)cats[p.category]++;else cats[p.category]=(cats[p.category]||0)+1;});
+  var maxCat=Math.max.apply(null,Object.values(cats))||1;
+  var catRows=Object.keys(cats).filter(function(k){return cats[k]>0;}).map(function(k){
+    return '<div class="cat-bar-row"><span class="cat-bar-label">'+k+'</span><div class="cat-bar-track"><div class="cat-bar-fill" style="width:'+(cats[k]/maxCat*100)+'%"></div></div><span class="cat-bar-count">'+cats[k]+'</span></div>';
+  }).join('');
+  var recentRows=products.slice(-5).reverse().map(function(p){
+    return '<tr><td><img class="td-img" src="'+(p.image||'https://placehold.co/44x44/1A1E28/C05572?text=?')+'" onerror="this.src=\'https://placehold.co/44x44/1A1E28/C05572?text=?\'" alt=""/></td>'+
+      '<td><div class="td-name">'+p.name+'</div><div class="td-sub">'+p.sku+'</div></td>'+
+      '<td>'+p.category+'</td>'+
+      '<td>৳'+p.price.toFixed(2)+'</td>'+
+      '<td><span class="badge '+(p.stock!=='out of stock'?'badge-instock':'badge-outstock')+'">'+(p.stock!=='out of stock'?'In Stock':'Out of Stock')+'</span></td>'+
+      '</tr>';
+  }).join('');
+  return '<div class="stats-grid">'+
+    statCard('fa-shopping-bag','si-rose','Total Products',total,'All categories')+
+    statCard('fa-star','si-gold','Featured',featured,'Bestsellers')+
+    statCard('fa-check-circle','si-green','In Stock',inStock,'Ready to sell')+
+    statCard('fa-images','si-teal','Hero Slides',heroes,'On slider')+
+    '</div>'+
+    '<div class="dash-grid">'+
+      '<div class="dash-card"><div class="dash-card-title"><i class="fas fa-tags"></i>By Category</div>'+catRows+'</div>'+
+      '<div class="dash-card"><div class="dash-card-title"><i class="fas fa-clock"></i>Recently Added</div>'+
+        '<div class="table-wrap" style="background:transparent;border:none">'+
+          '<table>'+
+            '<thead><tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th></tr></thead>'+
+            '<tbody>'+(recentRows||'<tr><td colspan="5" class="empty-state" style="text-align:center;padding:20px">No products yet</td></tr>')+'</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="margin-top:14px"><div class="table-wrap"><div style="padding:16px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'+
+      '<div class="sync-status"><div class="status-dot status-ok"></div><span style="font-size:12px;color:var(--sub)">Google Sheet connected — Products auto-load on store visit</span></div>'+
+      '<button class="btn-sm btn-teal" onclick="syncSheet()"><i class="fas fa-sync-alt"></i>Sync Now</button>'+
+    '</div></div></div>';
+}
+function statCard(icon,cls,label,val,note){
+  return '<div class="stat-card"><div class="stat-icon '+cls+'"><i class="fas '+icon+'"></i></div>'+
+    '<div><div class="stat-label">'+label+'</div><div class="stat-value">'+val+'</div><div class="stat-note">'+note+'</div></div></div>';
+}
+
+/* =============================================
+   PRODUCT TABLE
+   ============================================= */
+function buildTable(view){
+  var list=products;
+  if(view==='hero')list=products.filter(function(p){return p.heroSlide;});
+  else if(view==='promo')list=products.filter(function(p){return p.promoBanner;});
+  if(tableFilter){var q=tableFilter.toLowerCase();list=list.filter(function(p){return p.name.toLowerCase().indexOf(q)>-1||p.sku.toLowerCase().indexOf(q)>-1||p.category.toLowerCase().indexOf(q)>-1;});}
+  if(tableCatFilter){list=list.filter(function(p){return p.category===tableCatFilter;});}
+  if(tableStockFilter){list=list.filter(function(p){return p.stock===tableStockFilter;});}
+  var total=list.length;var pages=Math.max(1,Math.ceil(total/pageSize));currentPage=Math.min(currentPage,pages);
+  var paged=list.slice((currentPage-1)*pageSize,currentPage*pageSize);
+  var catOpts=CATS.map(function(c){return'<option value="'+c+'"'+(tableCatFilter===c?' selected':'')+'>'+c+'</option>';}).join('');
+  var rows=paged.map(function(p,idx){
+    var realIdx=products.indexOf(p);
+    return '<tr>'+
+      '<td><img class="td-img" src="'+(p.image||'https://placehold.co/44x44/1A1E28/C05572?text=?')+'" onerror="this.src=\'https://placehold.co/44x44/1A1E28/C05572?text=?\'" alt=""/></td>'+
+      '<td><div class="td-name">'+p.name+'</div><div class="td-sub">'+p.sku+'</div></td>'+
+      '<td>'+p.category+'</td>'+
+      '<td>৳'+p.price.toFixed(2)+(p.origPrice>p.price?'<br/><small style="color:var(--muted);text-decoration:line-through">৳'+p.origPrice.toFixed(2)+'</small>':'')+'</td>'+
+      '<td><span class="badge '+(p.stock!=='out of stock'?'badge-instock':'badge-outstock')+'">'+(p.stock!=='out of stock'?'In Stock':'Out')+'</span></td>'+
+      '<td style="white-space:nowrap">'+
+        (p.featured?'<span class="badge badge-featured" style="margin-right:4px">⭐ Best</span>':'')+
+        (p.heroSlide?'<span class="badge badge-hero" style="margin-right:4px">Hero</span>':'')+
+        (p.promoBanner?'<span class="badge badge-promo">Promo</span>':'')+
+      '</td>'+
+      '<td style="white-space:nowrap">'+
+        '<button class="action-btn act-edit" onclick="openEditModal('+realIdx+')" title="Edit"><i class="fas fa-pen"></i></button> '+
+        '<button class="action-btn act-del" onclick="openDeleteModal('+realIdx+')" title="Delete"><i class="fas fa-trash-alt"></i></button>'+
+      '</td>'+
+    '</tr>';
+  }).join('');
+  if(!rows)rows='<tr><td colspan="7" style="text-align:center;padding:40px"><div class="empty-state" style="display:inline-block"><i class="fas fa-shopping-bag" style="font-size:32px;color:var(--border);display:block;margin-bottom:10px"></i><span style="color:var(--sub)">No products match</span></div></td></tr>';
+  var pageButtons='';for(var i=1;i<=pages;i++){pageButtons+='<div class="page-btn'+(i===currentPage?' active':'')+'" data-page="'+i+'">'+i+'</div>';}
+  return '<div class="table-wrap">'+
+    '<div class="table-toolbar">'+
+      '<input class="table-search" id="tableSearch" placeholder="Search name, SKU, category…" value="'+tableFilter+'" oninput="tableFilter=this.value;currentPage=1;renderCurrentPage()"/>'+
+      '<select class="tbl-filter" id="catFilter" onchange="tableCatFilter=this.value;currentPage=1;renderCurrentPage()"><option value="">All Categories</option>'+catOpts+'</select>'+
+      '<select class="tbl-filter" id="stockFilter" onchange="tableStockFilter=this.value;currentPage=1;renderCurrentPage()">'+
+        '<option value="">All Stock</option>'+
+        '<option value="in stock"'+(tableStockFilter==='in stock'?' selected':'')+'>In Stock</option>'+
+        '<option value="out of stock"'+(tableStockFilter==='out of stock'?' selected':'')+'>Out of Stock</option>'+
+      '</select>'+
+    '</div>'+
+    '<table>'+
+      '<thead><tr><th></th><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Flags</th><th>Actions</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody>'+
+    '</table>'+
+    '<div class="pagination"><span>'+total+' product'+(total!==1?'s':'')+' · Page '+currentPage+' of '+pages+'</span><div class="page-btns" id="pageButtons">'+pageButtons+'</div></div>'+
+  '</div>';
+}
+
+function attachTableEvents(){
+  var pb=document.getElementById('pageButtons');
+  if(pb){pb.querySelectorAll('.page-btn').forEach(function(btn){btn.addEventListener('click',function(){currentPage=parseInt(this.getAttribute('data-page'));renderCurrentPage();});});}
+}
+
+/* =============================================
+   IMPORT / EXPORT
+   ============================================= */
+function buildImport(){
+  return '<div class="ie-grid">'+
+    '<div class="ie-card">'+
+      '<div class="ie-title"><i class="fas fa-file-export"></i>Export</div>'+
+      '<div class="ie-desc">Download your products as CSV (compatible with Google Sheets) or JSON backup.</div>'+
+      '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
+        '<button class="btn-sm btn-rose" onclick="exportCSV()"><i class="fas fa-table"></i>Export CSV</button>'+
+        '<button class="btn-sm btn-ghost" onclick="exportJSON()"><i class="fas fa-code"></i>Export JSON</button>'+
+        '<button class="btn-sm" style="background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.2)" onclick="clearAllProducts()"><i class="fas fa-trash-alt"></i>Clear All</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="ie-card">'+
+      '<div class="ie-title"><i class="fas fa-file-import"></i>Import</div>'+
+      '<div class="ie-desc">Import products from a CSV or JSON file. CSV must have headers: <code>SKU, Name, Category, Price, OriginalPrice, Color, Size, Material, ImageURL, Badge, Description, Featured, Stock, HeroSlide, PromoBanner, WhatsappMsg</code></div>'+
+      '<div class="drop-zone" id="dropZone" onclick="document.getElementById(\'fileInput\').click()" ondragover="event.preventDefault();this.classList.add(\'over\')" ondragleave="this.classList.remove(\'over\')" ondrop="handleFileDrop(event)">'+
+        '<i class="fas fa-cloud-upload-alt"></i>'+
+        '<p>Drop CSV or JSON file here</p>'+
+        '<span>or click to browse</span>'+
+      '</div>'+
+      '<input type="file" id="fileInput" accept=".csv,.json" style="display:none" onchange="handleFileSelect(this)"/>'+
+      '<div class="import-preview" id="importPreview" style="display:none"></div>'+
+    '</div>'+
+    '</div>'+
+    '<div class="ie-card" style="margin-top:18px;max-width:700px">'+
+      '<div class="ie-title"><i class="fas fa-table"></i>Google Sheets Column Reference</div>'+
+      '<div class="colhead">Your sheet should have these columns in order:<br/>'+
+        '<strong>A</strong>: SKU &nbsp;·&nbsp; <strong>B</strong>: Name &nbsp;·&nbsp; <strong>C</strong>: Category &nbsp;·&nbsp; <strong>D</strong>: Price &nbsp;·&nbsp; <strong>E</strong>: OriginalPrice<br/>'+
+        '<strong>F</strong>: Color &nbsp;·&nbsp; <strong>G</strong>: Size &nbsp;·&nbsp; <strong>H</strong>: Material &nbsp;·&nbsp; <strong>I</strong>: ImageURL &nbsp;·&nbsp; <strong>J</strong>: Badge<br/>'+
+        '<strong>K</strong>: Description &nbsp;·&nbsp; <strong>L</strong>: Featured (yes/no) &nbsp;·&nbsp; <strong>M</strong>: Stock (in stock/out of stock)<br/>'+
+        '<strong>N</strong>: HeroSlide (yes/no) &nbsp;·&nbsp; <strong>O</strong>: PromoBanner (yes/no) &nbsp;·&nbsp; <strong>P</strong>: WhatsappMsg'+
+      '</div>'+
+      '<button class="btn-sm btn-teal" onclick="syncSheet()"><i class="fas fa-sync-alt"></i>Sync from Google Sheet Now</button>'+
+    '</div>';
+}
+
+function exportCSV(){
+  var headers='SKU,Name,Category,Price,OriginalPrice,Color,Size,Material,ImageURL,Badge,Description,Featured,Stock,HeroSlide,PromoBanner,WhatsappMsg';
+  var rows=products.map(function(p){
+    return [p.sku,p.name,p.category,p.price,p.origPrice||0,p.color||'',p.size||'',p.material||'',p.image||'',p.badge||'',p.desc||'',p.featured?'yes':'no',p.stock,p.heroSlide?'yes':'no',p.promoBanner?'yes':'no',p.waMsg||''].map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(',');
+  });
+  downloadFile([headers,...rows].join('\n'),'piluk-products.csv','text/csv');
+  showToast('CSV exported ('+products.length+' products)','success');
+}
+function exportJSON(){
+  downloadFile(JSON.stringify(products,null,2),'piluk-products.json','application/json');
+  showToast('JSON exported','success');
+}
+function downloadFile(content,filename,mime){
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:mime}));a.download=filename;a.click();URL.revokeObjectURL(a.href);
+}
+function clearAllProducts(){if(!confirm('Delete ALL '+products.length+' products? This cannot be undone.'))return;products=[];saveProducts();renderCurrentPage();showToast('All products cleared','danger');}
+
+function handleFileSelect(inp){if(inp.files[0])readFile(inp.files[0]);}
+function handleFileDrop(e){
+  e.preventDefault();document.getElementById('dropZone').classList.remove('over');
+  var f=e.dataTransfer.files[0];if(f)readFile(f);
+}
+function readFile(f){
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var text=e.target.result;var prev=document.getElementById('importPreview');
+    try{
+      var imported;
+      if(f.name.endsWith('.json')){imported=JSON.parse(text);if(!Array.isArray(imported))throw new Error('Expected array');}
+      else{imported=parseCSV(text);}
+      if(imported.length===0)throw new Error('No data found');
+      prev.style.display='block';
+      prev.innerHTML='<strong style="color:var(--teal)">Preview: '+imported.length+' products found</strong><br/>'+
+        imported.slice(0,3).map(function(p){return'✓ '+p.name+' ('+p.sku+') — ৳'+p.price;}).join('<br/>')+
+        (imported.length>3?'<br/>… and '+(imported.length-3)+' more':'')+'<br/><br/>'+
+        '<button class="btn-sm btn-rose" onclick="confirmImport('+JSON.stringify(imported).replace(/"/g,'&quot;')+')">✓ Import All</button> '+
+        '<button class="btn-sm btn-ghost" onclick="document.getElementById(\'importPreview\').style.display=\'none\'">Cancel</button>';
+    }catch(err){prev.style.display='block';prev.innerHTML='<span style="color:var(--danger)">Error: '+err.message+'</span>';}
+  };reader.readAsText(f);
+}
+function confirmImport(data){
+  products=typeof data==='string'?JSON.parse(data):data;
+  saveProducts();renderCurrentPage();
+  document.getElementById('importPreview').style.display='none';
+  showToast('Imported '+products.length+' products','success');
+}
+
+/* =============================================
+   STORE CONFIG
+   ============================================= */
+function buildConfig(){
+  var cfg=getConfig();
+  return '<div class="config-grid">'+
+    formField('Store Name',cfg.store,'cfgStore')+
+    formField('Currency Symbol',cfg.currency,'cfgCur')+
+    formField('WhatsApp Number',cfg.wa,'cfgWa')+
+    formField('Free Delivery Threshold (৳)',cfg.freeDelivery,'cfgFree')+
+    '<div class="form-group full">'+
+      '<div class="form-label">Google Sheet URL</div>'+
+      '<input class="form-inp" id="cfgSheet" value="'+cfg.sheet+'"/>'+
+    '</div>'+
+    '<div class="form-group full" style="display:flex;gap:10px">'+
+      '<button class="btn-md btn-save" onclick="saveConfig()"><i class="fas fa-save"></i>Save Config</button>'+
+      '<button class="btn-md btn-teal btn-md" onclick="syncSheet()"><i class="fas fa-sync-alt"></i>Sync Sheet</button>'+
+    '</div>'+
+  '</div>';
+}
+function formField(label,val,id){return'<div class="form-group"><div class="form-label">'+label+'</div><input class="form-inp" id="'+id+'" value="'+val+'"/></div>';}
+function getConfig(){
+  try{var c=JSON.parse(localStorage.getItem('piluk_config')||'{}');return{store:c.store||'PILUK',currency:c.currency||'৳',wa:c.wa||'8801754007716',sheet:c.sheet||SHEET_URL,freeDelivery:c.freeDelivery||'999'};}
+  catch(e){return{store:'PILUK',currency:'৳',wa:'8801754007716',sheet:SHEET_URL,freeDelivery:'999'};}
+}
+function saveConfig(){
+  var cfg={store:document.getElementById('cfgStore').value,currency:document.getElementById('cfgCur').value,wa:document.getElementById('cfgWa').value,sheet:document.getElementById('cfgSheet').value,freeDelivery:document.getElementById('cfgFree').value};
+  localStorage.setItem('piluk_config',JSON.stringify(cfg));
+  showToast('Config saved!','success');
+}
+
+/* =============================================
+   PRODUCT MODAL
+   ============================================= */
+function openAddModal(){
+  editingIdx=null;
+  document.getElementById('modalTitle').textContent='Add New Product';
+  clearForm();
+  document.getElementById('productModal').classList.add('open');
+}
+function openEditModal(idx){
+  editingIdx=idx;var p=products[idx];
+  document.getElementById('modalTitle').textContent='Edit Product';
+  document.getElementById('fSku').value=p.sku||'';
+  document.getElementById('fName').value=p.name||'';
+  document.getElementById('fCat').value=p.category||'';
+  document.getElementById('fPrice').value=p.price||'';
+  document.getElementById('fOrigPrice').value=p.origPrice||'';
+  document.getElementById('fColor').value=p.color||'';
+  document.getElementById('fSize').value=p.size||'';
+  document.getElementById('fMaterial').value=p.material||'';
+  document.getElementById('fImage').value=p.image||'';
+  document.getElementById('fBadge').value=p.badge||'';
+  document.getElementById('fDesc').value=p.desc||'';
+  document.getElementById('fWaMsg').value=p.waMsg||'';
+  document.getElementById('fStock').value=p.stock||'in stock';
+  setToggle('togFeatured',p.featured);setToggle('togHero',p.heroSlide);setToggle('togPromo',p.promoBanner);
+  previewImg(p.image);
+  document.getElementById('productModal').classList.add('open');
+}
+function clearForm(){
+  ['fSku','fName','fPrice','fOrigPrice','fColor','fSize','fMaterial','fImage','fBadge','fDesc','fWaMsg'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('fCat').value='';document.getElementById('fStock').value='in stock';
+  setToggle('togFeatured',false);setToggle('togHero',false);setToggle('togPromo',false);
+  previewImg('');
+}
+function closeModal(){document.getElementById('productModal').classList.remove('open');}
+function saveProduct(){
+  var sku=document.getElementById('fSku').value.trim();
+  var name=document.getElementById('fName').value.trim();
+  var cat=document.getElementById('fCat').value;
+  var price=parseFloat(document.getElementById('fPrice').value)||0;
+  if(!sku||!name||!cat||!price){showToast('SKU, Name, Category and Price are required.','danger');return;}
+  var p={sku:sku,name:name,category:cat,price:price,
+    origPrice:parseFloat(document.getElementById('fOrigPrice').value)||0,
+    color:document.getElementById('fColor').value.trim(),
+    size:document.getElementById('fSize').value.trim(),
+    material:document.getElementById('fMaterial').value.trim(),
+    image:document.getElementById('fImage').value.trim(),
+    badge:document.getElementById('fBadge').value.trim(),
+    desc:document.getElementById('fDesc').value.trim(),
+    waMsg:document.getElementById('fWaMsg').value.trim(),
+    stock:document.getElementById('fStock').value,
+    featured:isToggleOn('togFeatured'),heroSlide:isToggleOn('togHero'),promoBanner:isToggleOn('togPromo')};
+  if(editingIdx!==null){products[editingIdx]=p;}else{products.push(p);}
+  saveProducts();closeModal();renderCurrentPage();
+  showToast(editingIdx!==null?'Product updated!':'Product added!','success');
+}
+
+/* =============================================
+   DELETE
+   ============================================= */
+function openDeleteModal(idx){
+  deleteIdx=idx;
+  document.getElementById('deleteProductName').textContent=products[idx]?products[idx].name:'';
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeDeleteModal(){document.getElementById('deleteModal').classList.remove('open');deleteIdx=null;}
+function confirmDelete(){
+  if(deleteIdx===null)return;
+  products.splice(deleteIdx,1);saveProducts();closeDeleteModal();renderCurrentPage();showToast('Product deleted','danger');
+}
+
+/* =============================================
+   HELPERS
+   ============================================= */
+function toggleBtn(el){el.classList.toggle('on');}
+function setToggle(id,val){var el=document.getElementById(id);if(val)el.classList.add('on');else el.classList.remove('on');}
+function isToggleOn(id){return document.getElementById(id).classList.contains('on');}
+function previewImg(url){var img=document.getElementById('imgPreview');if(img){img.src=url||'https://placehold.co/80x80/1A1E28/C05572?text=?';}}
+
+/* =============================================
+   TOAST
+   ============================================= */
+function showToast(msg,type){
+  type=type||'info';var wrap=document.getElementById('toastWrap');
+  var t=document.createElement('div');t.className='toast '+type;
+  var icons={success:'fa-check-circle',danger:'fa-exclamation-circle',info:'fa-info-circle'};
+  t.innerHTML='<i class="fas '+(icons[type]||'fa-info-circle')+'"></i><span>'+msg+'</span>';
+  wrap.appendChild(t);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('show');});});
+  setTimeout(function(){t.classList.remove('show');setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},350);},3200);
+}
+
+/* =============================================
+   KEYBOARD SHORTCUTS
+   ============================================= */
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){closeModal();closeDeleteModal();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openAddModal();}
+});
+</script>
+</body>
+</html>
